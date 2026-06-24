@@ -18,7 +18,7 @@ const salaryHistoryStore = useSalaryHistoryStore()
 const { items: list } = storeToRefs(salaryHistoryStore)
 
 function openDetail(item: SalaryHistoryItem) {
-  uni.navigateTo({ url: `/pages/salary/detail?id=${encodeURIComponent(item.id)}` })
+  uni.navigateTo({ url: `/pages-sub/salary/detail?id=${encodeURIComponent(item.id)}` })
 }
 
 function fmt(n: number) {

@@ -133,7 +133,16 @@ export default defineManifestConfig({
     mergeVirtualHostAttributes: true,
     // styleIsolation: 'shared',
     usingComponents: true,
-    // __usePrivacyCheck__: true,
+    __usePrivacyCheck__: true,
+    permission: {
+      'scope.camera': {
+        desc: '用于扫描 WiFi 二维码',
+      },
+      'scope.writePhotosAlbum': {
+        desc: '用于保存 WiFi 二维码到相册',
+      },
+    },
+    requiredPrivateInfos: [],
   },
   'mp-alipay': {
     usingComponents: true,

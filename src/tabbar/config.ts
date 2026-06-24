@@ -19,7 +19,7 @@ export const TABBAR_STRATEGY_MAP = {
 // 如果是使用 NO_TABBAR(0)，nativeTabbarList 和 customTabbarList 都不生效
 // 如果是使用 NATIVE_TABBAR(1)，只需要配置 nativeTabbarList，customTabbarList 不生效
 // 如果是使用 CUSTOM_TABBAR(2)，只需要配置 customTabbarList，nativeTabbarList 不生效
-export const selectedTabbarStrategy = TABBAR_STRATEGY_MAP.CUSTOM_TABBAR
+export const selectedTabbarStrategy = TABBAR_STRATEGY_MAP.NO_TABBAR
 
 // TODO: 2/3. 使用 NATIVE_TABBAR 时，更新下面的 tabbar 配置
 // 原生 tabbar 不支持运行时按角色动态变更；要按角色动态显示/隐藏，必须切换到自定义 tabbar
@@ -35,19 +35,6 @@ export const nativeTabbarList: NativeTabBarItem[] = [
 // TODO: 3/3. 使用 CUSTOM_TABBAR 时，更新下面的 tabbar 配置
 // 如果需要配置鼓包，需要在 'tabbar/store.ts' 里面设置，最后在 `tabbar/index.vue` 里面更改鼓包的图片
 export const customTabbarList: CustomTabBarItem[] = [
-  {
-    text: '薪资计算',
-    pagePath: 'pages/salary/calc',
-    iconType: 'unocss',
-    icon: 'i-carbon-home',
-  },
-  {
-    text: '历史记录',
-    pagePath: 'pages/salary/history',
-    iconType: 'unocss',
-    icon: 'i-carbon-time',
-  },
-
   // 其他类型演示
   // 1、uiLib
   // {
@@ -101,7 +88,7 @@ const _tabbar: TabBar = {
   // 只有微信小程序支持 custom。App 和 H5 不生效
   custom: selectedTabbarStrategy === TABBAR_STRATEGY_MAP.CUSTOM_TABBAR,
   color: '#999999',
-  selectedColor: '#4285f4',
+  selectedColor: '#007AFF',
   backgroundColor: '#F8F8F8',
   borderStyle: 'black',
   height: '50px',

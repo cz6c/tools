@@ -421,7 +421,7 @@ const INCOME_TAX_BRACKETS = [
   text-align: center;
 }
 .month-num.text-primary {
-  color: var(--wot-primary-6, #4285f4);
+  color: var(--wot-primary-6, #007aff);
 }
 
 .pit-table {

@@ -15,15 +15,6 @@ definePage({
 
 const canvasId = 'idWatermarkCanvas'
 
-/** uni-app / 小程序 input */
-interface UniInputEvent {
-  detail?: { value?: string }
-}
-
-interface UniSliderEvent {
-  detail?: { value?: number }
-}
-
 const imagePath = ref('')
 const imgW = ref(0)
 const imgH = ref(0)
@@ -74,23 +65,12 @@ watch(
   () => scheduleDraw(),
 )
 
-function onTextInput(e: UniInputEvent) {
-  watermarkText.value = String(e.detail?.value ?? '')
+function pickColor(value: WatermarkColor) {
+  color.value = value
 }
 
-function onOpacityChange(e: UniSliderEvent) {
-  opacity.value = Number(e.detail?.value ?? opacity.value)
-  scheduleDraw()
-}
-
-function onSpacingChange(e: UniSliderEvent) {
-  spacing.value = Number(e.detail?.value ?? spacing.value)
-  scheduleDraw()
-}
-
-function onFontSizeChange(e: UniSliderEvent) {
-  fontSize.value = Number(e.detail?.value ?? fontSize.value)
-  scheduleDraw()
+function pickAngle(deg: -30 | -45 | -60) {
+  angleDeg.value = deg
 }
 
 function choosePhoto() {
@@ -255,10 +235,11 @@ function saveWatermarked() {
 
 <template>
   <view class="page pb-safe">
-    <view class="notice">
-      <text class="notice-icon">🔔</text>
-      <text class="notice-text">小程序不会存储您的原始照片及加了水印后的照片，请放心使用！</text>
-    </view>
+    <wd-notice-bar
+      text="小程序不会存储您的原始照片及加了水印后的照片，请放心使用！"
+      prefix="notification"
+      type="warning"
+    />
 
     <view class="preview-outer">
       <view class="preview-canvas-wrap checkerboard">
@@ -268,126 +249,97 @@ function saveWatermarked() {
           class="preview-canvas"
           :style="canvasStyle"
         />
-        <view v-if="!imagePath" class="empty-hint">
-          <text>请先选择证件照片</text>
+        <view v-if="!imagePath" class="empty-wrap">
+          <wd-empty tip="请先选择证件照片" />
         </view>
       </view>
     </view>
 
-    <view class="panel">
-      <view class="row">
-        <text class="label">文字</text>
-        <input
-          class="field"
-          type="text"
-          :value="watermarkText"
+    <wd-cell-group border custom-class="panel-group">
+      <wd-cell title="文字" :title-width="52" center>
+        <wd-input
+          v-model="watermarkText"
+          align-right
           placeholder="输入水印内容"
-          @input="onTextInput"
-        >
-      </view>
+          custom-class="panel-input"
+        />
+      </wd-cell>
 
-      <view class="row row-top">
-        <text class="label">颜色</text>
-        <view class="color-row">
-          <view
+      <wd-cell title="颜色" :title-width="52" center custom-class="tag-cell">
+        <view class="tag-row">
+          <wd-tag
             v-for="c in colors"
             :key="c.value"
-            class="color-opt"
-            @click="color = c.value; scheduleDraw()"
+            :type="color === c.value ? 'primary' : 'default'"
+            variant="plain"
+            round
+            @click="pickColor(c.value)"
           >
-            <view
-              class="color-dot"
-              :class="{ ring: color === c.value }"
-              :style="{ backgroundColor: c.value, borderColor: c.value === '#ffffff' ? '#ddd' : c.value }"
-            />
-            <view v-if="color === c.value" class="check text-primary">
-              ✓
-            </view>
-          </view>
+            {{ c.label }}
+          </wd-tag>
         </view>
-      </view>
+      </wd-cell>
 
-      <view class="row row-slider">
-        <text class="label">透明度</text>
-        <slider
-          class="slider"
-          :value="opacity"
+      <wd-cell title="透明度" :title-width="52">
+        <wd-slider
+          v-model="opacity"
           :min="8"
           :max="100"
           :step="1"
-          show-value
-          active-color="#4285f4"
-          :block-size="20"
-          @changing="onOpacityChange"
-          @change="onOpacityChange"
+          active-color="#007aff"
         />
-      </view>
+      </wd-cell>
 
-      <view class="row row-top">
-        <text class="label">角度</text>
-        <view class="angle-row">
-          <view
+      <wd-cell title="角度" :title-width="52" center custom-class="tag-cell">
+        <view class="tag-row">
+          <wd-tag
             v-for="a in anglePresets"
             :key="a.deg"
-            class="angle-opt"
-            @click="angleDeg = a.deg; scheduleDraw()"
+            :type="angleDeg === a.deg ? 'primary' : 'default'"
+            variant="plain"
+            round
+            @click="pickAngle(a.deg)"
           >
-            <view class="angle-icon" :class="[`tilt-${Math.abs(a.deg)}`, { on: angleDeg === a.deg }]">
-              <view class="angle-line" />
-            </view>
-            <view v-if="angleDeg === a.deg" class="check text-primary">
-              ✓
-            </view>
-          </view>
+            {{ a.title }}
+          </wd-tag>
         </view>
-      </view>
+      </wd-cell>
 
-      <view class="row row-slider">
-        <text class="label">间距</text>
-        <slider
-          class="slider"
-          :value="spacing"
+      <wd-cell title="间距" :title-width="52">
+        <wd-slider
+          v-model="spacing"
           :min="24"
           :max="120"
           :step="1"
-          show-value
-          active-color="#4285f4"
-          :block-size="20"
-          @changing="onSpacingChange"
-          @change="onSpacingChange"
+          active-color="#007aff"
         />
-      </view>
+      </wd-cell>
 
-      <view class="row row-slider">
-        <text class="label">字体大小</text>
-        <slider
-          class="slider"
-          :value="fontSize"
+      <wd-cell title="字体大小" :title-width="64">
+        <wd-slider
+          v-model="fontSize"
           :min="12"
           :max="56"
           :step="1"
-          show-value
-          active-color="#4285f4"
-          :block-size="20"
-          @changing="onFontSizeChange"
-          @change="onFontSizeChange"
+          active-color="#007aff"
         />
-      </view>
-    </view>
+      </wd-cell>
+    </wd-cell-group>
 
     <view class="actions">
-      <button class="btn btn-outline" type="default" @click="choosePhoto">
+      <wd-button plain round block custom-class="action-btn" @click="choosePhoto">
         选择照片
-      </button>
-      <button
-        class="btn btn-primary"
+      </wd-button>
+      <wd-button
+
+        round block
         type="primary"
         :loading="saving"
-        :disabled="saving"
+        custom-class="action-btn"
         @click="saveWatermarked"
       >
         保存水印照片
-      </button>
+      </wd-button>
     </view>
   </view>
 </template>
@@ -395,28 +347,7 @@ function saveWatermarked() {
 <style scoped lang="scss">
 .page {
   min-height: 100vh;
-  background: #f5f5f5;
-  padding-bottom: 24px;
-}
-
-.notice {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-  padding: 10px 14px;
-  background: #fff9e6;
-  color: #8a6914;
-  font-size: 13px;
-  line-height: 1.45;
-}
-
-.notice-icon {
-  flex-shrink: 0;
-  margin-top: 1px;
-}
-
-.notice-text {
-  flex: 1;
+  background: #f5f7fa;
 }
 
 .preview-outer {
@@ -452,130 +383,29 @@ function saveWatermarked() {
   max-width: 100%;
 }
 
-.empty-hint {
+.empty-wrap {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: none;
-  color: #999;
-  font-size: 14px;
 }
 
-.panel {
+:deep(.panel-group) {
   margin: 16px;
-  padding: 16px 14px;
-  background: #fff;
   border-radius: 12px;
+  overflow: hidden;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
-.row {
-  display: flex;
+.tag-row {
+  display: inline-flex;
+  flex-wrap: nowrap;
   align-items: center;
-  margin-bottom: 14px;
-}
-
-.row-top {
-  align-items: flex-start;
-}
-
-.row-slider {
-  align-items: center;
-}
-
-.row:last-child {
-  margin-bottom: 0;
-}
-
-.label {
-  width: 72px;
-  flex-shrink: 0;
-  font-size: 14px;
-  color: #333;
-}
-
-.field {
-  flex: 1;
-  height: 36px;
-  padding: 0 10px;
-  font-size: 14px;
-  background: #f7f7f7;
-  border-radius: 6px;
-}
-
-.color-row,
-.angle-row {
-  flex: 1;
-  display: flex;
-  gap: 28px;
-  align-items: flex-start;
-}
-
-.color-opt,
-.angle-opt {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.color-dot {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  border: 1px solid transparent;
-}
-
-.color-dot.ring {
-  box-shadow: 0 0 0 2px var(--wot-primary-6, #4285f4);
-}
-
-.angle-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid #ddd;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #fafafa;
-}
-
-.angle-icon.on {
-  border-color: var(--wot-primary-6, #4285f4);
-  box-shadow: 0 0 0 1px var(--wot-primary-6, #4285f4);
-}
-
-.angle-line {
-  width: 22px;
-  height: 3px;
-  background: #555;
-  border-radius: 1px;
-}
-
-.tilt-30 .angle-line {
-  transform: rotate(-30deg);
-}
-
-.tilt-45 .angle-line {
-  transform: rotate(-45deg);
-}
-
-.tilt-60 .angle-line {
-  transform: rotate(-60deg);
-}
-
-.check {
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1;
-}
-
-.slider {
-  flex: 1;
-  margin-right: 0;
+  justify-content: flex-end;
+  gap: 8px;
+  width: 100%;
 }
 
 .actions {
@@ -584,22 +414,7 @@ function saveWatermarked() {
   padding: 8px 16px 0;
 }
 
-.btn {
+:deep(.action-btn) {
   flex: 1;
-  font-size: 15px;
-  border-radius: 10px;
-  line-height: 44px;
-  border: none;
-}
-
-.btn-outline {
-  background: #fff !important;
-  color: var(--wot-primary-6, #4285f4) !important;
-  border: 1px solid var(--wot-primary-6, #4285f4) !important;
-}
-
-.btn-primary {
-  background: var(--wot-primary-6, #4285f4) !important;
-  color: #fff !important;
 }
 </style>

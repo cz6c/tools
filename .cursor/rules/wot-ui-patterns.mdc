@@ -1,0 +1,80 @@
+---
+description: 页面开发必须优先使用 wot-ui（wd-*）组件，仅特殊布局可例外
+globs: src/**/*.vue
+alwaysApply: false
+---
+
+# wot-ui 组件使用规范
+
+本项目 UI 库为 **wot-ui**（`@wot-ui/ui`，前缀 `wd-`）。easycom 已配置，**无需手动 import**，直接在模板中使用。
+
+## 核心原则
+
+**能用 wot-ui 的必须用，禁止用原生标签或手写样式重复造轮子。**
+
+仅以下情况允许不用 wot-ui：
+
+- **布局容器**：`view`、`scroll-view`、`canvas`、`image` 等结构性/平台能力元素
+- **品牌/营销页**：首页大按钮、渐变背景、自定义 Hero 区等强视觉设计
+- **wot-ui 无对应能力**：如 `uni.scanCode`、地图、视频等原生 API 场景
+
+拿不准时，先查 [wot-ui 文档](https://wot-design-uni.cn/) 再写代码。
+
+## 组件对照（必须遵守）
+
+| 场景 | ❌ 禁止 | ✅ 使用 |
+|------|--------|--------|
+| 按钮 | `<button>` | `wd-button` |
+| 输入框 | `<input>` | `wd-input`（表单内配合 `wd-cell`） |
+| 表单行/列表 | 手写 flex 行 | `wd-cell` + `wd-cell-group` |
+| 弹层/抽屉 | 手写遮罩 div | `wd-popup` |
+| 确认/提示框 | 仅 `uni.showModal` | `useMessage` / `MessageBox`（简单场景可用 `uni.showModal`） |
+| Toast | 仅 `uni.showToast` | `useToast`（简单一行提示可用 `uni.showToast`） |
+| 空状态 | 手写「暂无数据」 | `wd-empty` |
+| 标签/角标 | 手写 span 样式 | `wd-tag` / `wd-badge` |
+| 选择器 | 原生 `<picker>` | `wd-picker` / `wd-select-picker` / `wd-picker-view` |
+| 开关/复选/单选 | 原生 switch/checkbox | `wd-switch` / `wd-checkbox` / `wd-radio` |
+| 通知条 | 手写提示条 | `wd-notice-bar` |
+| 滑动操作 | 手写侧滑 | `wd-swipe-action` |
+| 加载中 | 手写 loading | `wd-loading` |
+| 图标 | emoji/文字代替 | `wd-icon` |
+| 分割线 | 手写 border | `wd-divider` |
+
+## 写法示例
+
+```vue
+<!-- ❌ BAD：原生表单 -->
+<input v-model="ssid" placeholder="请输入 WiFi 名称" />
+<button @click="submit">提交</button>
+
+<!-- ✅ GOOD：wot-ui 表单 -->
+<wd-cell-group border>
+  <wd-cell title="WiFi 名称">
+    <wd-input v-model="ssid" placeholder="请输入 WiFi 名称" />
+  </wd-cell>
+</wd-cell-group>
+<wd-button type="primary" block @click="submit">提交</wd-button>
+```
+
+```vue
+<!-- ❌ BAD：弹层内原生按钮 -->
+<wd-popup v-model="visible">
+  <button @click="confirm">确定</button>
+</wd-popup>
+
+<!-- ✅ GOOD -->
+<wd-popup v-model="visible">
+  <wd-button type="primary" @click="confirm">确定</wd-button>
+</wd-popup>
+```
+
+## 样式约定
+
+- 组件外观优先用 wot-ui 的 `type`、`size`、`plain`、`round` 等 props 控制
+- 布局与间距用 **UnoCSS** 原子类（见 `styling-css-patterns.mdc`）
+- 需要微调时用 `custom-class` / `custom-style`，不要覆盖组件内部结构
+
+## 参考实现
+
+- 表单 + 弹层：`src/pages-sub/salary/calc.vue`
+- 列表 + 空态 + 滑动删除：`src/pages-sub/salary/history.vue`

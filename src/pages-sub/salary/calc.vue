@@ -16,20 +16,8 @@ import { getCityProfile } from '@/utils/salaryCalculator'
 defineOptions({ name: 'SalaryCalc' })
 
 definePage({
-  type: 'home',
   style: {
-    'navigationStyle': 'custom',
-    'navigationBarTitleText': '税后工资计算',
-    /**
-     * 支付宝：须显式覆盖标题，否则会沿用 globalStyle 的 navigationBarTitleText（如「unibest」）；
-     * 空格用于占位隐藏原生文案，配合 transparentTitle 与自定义头部。
-     * @see https://opendocs.alipay.com/mini/framework/app-json
-     */
-    'mp-alipay': {
-      defaultTitle: ' ',
-      transparentTitle: 'always',
-      titlePenetrate: 'YES',
-    },
+    navigationBarTitleText: '税后工资计算',
   },
 })
 
@@ -141,7 +129,7 @@ const hfRatePercentStr = computed(() => {
 })
 
 function openSelectCity() {
-  uni.navigateTo({ url: '/pages/salary/select-city' })
+  uni.navigateTo({ url: '/pages-sub/salary/select-city' })
 }
 
 function pickSsType(key: SsPaymentType) {
@@ -180,20 +168,18 @@ function goDetail() {
       result: cloneSalaryCalcResult(result.value),
     },
   })
-  uni.navigateTo({ url: '/pages/salary/detail' })
+  uni.navigateTo({ url: '/pages-sub/salary/detail' })
+}
+
+function goHistory() {
+  uni.navigateTo({ url: '/pages-sub/salary/history' })
 }
 </script>
 
 <template>
   <page-meta :page-style="`overflow:${showSsTypePicker || showYearEndModePicker || showHfTypePicker || showSpecialDeductionTip ? 'hidden' : 'visible'};`" />
   <view class="page">
-    <view class="header header--gradient pt-safe">
-      <view class="header-bar h-44px flex items-center justify-center text-17px text-#fff font-medium">
-        税后工资计算
-      </view>
-    </view>
-
-    <view class="form-scroll px-12px pb-12px -mt-12px">
+    <view class="form-scroll px-12px pb-12px pt-12px">
       <wd-cell-group custom-class="salary-cell-group mb-12px" border>
         <wd-cell title="工作城市" :value="cityLabel" is-link @click="openSelectCity" />
         <wd-cell title="税前月薪">
@@ -318,6 +304,16 @@ function goDetail() {
 
       <wd-button :block="true" :round="true" size="large" type="primary" @click="goDetail">
         查看明细
+      </wd-button>
+      <wd-button
+        :block="true"
+        :round="true"
+        size="large"
+        plain
+        custom-class="mt-12px"
+        @click="goHistory"
+      >
+        历史记录
       </wd-button>
       <view class="mt-12px px-8px text-center text-11px text-#999 leading-relaxed">
         注：由于各地政策有细微差异，计算结果仅供参考
@@ -449,13 +445,6 @@ function goDetail() {
 .page {
   min-height: 100vh;
   background: #f5f5f5;
-}
-
-.header--gradient {
-  background-image: linear-gradient(var(--wot-primary-6, #4285f4) 10%, var(--wot-primary-6, #4285f4) 100%);
-  .header-bar {
-    padding-bottom: 32px;
-  }
 }
 
 :deep(.salary-cell-group) {

@@ -99,7 +99,7 @@ export default defineConfig({
   theme: {
     colors: {
       /** 主题色，用法如: text-primary */
-      primary: 'var(--wot-primary-6,#4285f4)',
+      primary: 'var(--wot-primary-6,#007aff)',
     },
     fontSize: {
       /** 提供更小号的字体，用法如：text-2xs */
