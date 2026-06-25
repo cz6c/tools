@@ -66,22 +66,22 @@ const INCOME_TAX_BRACKETS = [
 </script>
 
 <template>
-  <view class="page pb-24px">
-    <view class="hero bg-primary px-16px pb-20px pt-safe">
-      <view class="pt-12px text-center">
-        <text class="text-36px text-white font-semibold leading-none tabular-nums">
+  <view class="page-shell pb-48rpx">
+    <view class="hero bg-primary px-32rpx pb-40rpx pt-safe">
+      <view class="pt-24rpx text-center">
+        <text class="text-72rpx text-white font-semibold leading-none tabular-nums">
           {{ fmt(r.annualTakeHome) }}
         </text>
-        <view class="ml-8px mt-8px inline-block rounded-4px bg-white/20 px-8px py-1px">
-          <text class="text-12px text-white/95">
+        <view class="ml-16rpx mt-16rpx inline-block rounded-8rpx bg-white/20 px-16rpx py-2rpx">
+          <text class="text-24rpx text-white/95">
             到手年薪
           </text>
         </view>
       </view>
     </view>
 
-    <view class="px-12px -mt-12px">
-      <view class="card rounded-12px bg-white p-12px shadow-sm">
+    <view class="px-24rpx -mt-24rpx">
+      <view class="card-rounded p-24rpx">
         <view class="summary-grid">
           <view class="sum-cell">
             <text class="sum-val tabular-nums">
@@ -102,11 +102,11 @@ const INCOME_TAX_BRACKETS = [
         </view>
       </view>
 
-      <view class="section-title mt-20px">
-        <view class="bar bg-primary" />
+      <view class="section-title mt-40rpx">
+        <view class="section-bar" />
         <text>每月到手工资</text>
       </view>
-      <view class="card mt-8px overflow-hidden rounded-12px bg-white shadow-sm">
+      <view class="card-rounded mt-16rpx">
         <view class="month-table">
           <view class="month-head">
             <view class="month-cell month-cell--narrow">
@@ -170,22 +170,22 @@ const INCOME_TAX_BRACKETS = [
         </view>
       </view>
 
-      <view v-if="detailInput.yearEndBonus > 0" class="section-title mt-20px">
-        <view class="bar bg-primary" />
+      <view v-if="detailInput.yearEndBonus > 0" class="section-title mt-40rpx">
+        <view class="section-bar" />
         <text>年终奖</text>
       </view>
-      <view v-if="detailInput.yearEndBonus > 0" class="card mt-12px rounded-12px bg-white p-12px text-13px leading-relaxed shadow-sm">
+      <view v-if="detailInput.yearEndBonus > 0" class="card-rounded mt-24rpx p-24rpx text-26rpx leading-relaxed">
         <text class="text-#666">
           年终奖 {{ fmt(detailInput.yearEndBonus) }}，个税 {{ fmt(r.yearEndBonusTax) }}，到手 {{ fmt(r.yearEndBonusNet) }}
           （{{ yearEndTaxLabel }}）
         </text>
       </view>
 
-      <view class="section-title mt-20px">
-        <view class="bar bg-primary" />
+      <view class="section-title mt-40rpx">
+        <view class="section-bar" />
         <text>个人所得税税率表（综合所得适用）</text>
       </view>
-      <view class="card mt-8px overflow-hidden rounded-12px bg-white shadow-sm">
+      <view class="card-rounded mt-16rpx">
         <view class="pit-table">
           <view class="pit-head">
             <view class="pit-cell pit-cell--level">
@@ -239,7 +239,7 @@ const INCOME_TAX_BRACKETS = [
         </view>
       </view>
 
-      <view class="mt-12px px-8px text-center text-11px text-#999 leading-relaxed">
+      <view class="mt-24rpx px-16rpx text-center text-22rpx text-#999 leading-relaxed">
         注：由于各地政策有细微差异，计算结果仅供参考
       </view>
     </view>
@@ -247,122 +247,32 @@ const INCOME_TAX_BRACKETS = [
 </template>
 
 <style scoped lang="scss">
-.page {
-  min-height: 100vh;
-  background: #f5f5f5;
-}
 .hero {
-  padding-bottom: 28px;
+  padding-bottom: 56rpx;
 }
-.card {
-  box-sizing: border-box;
-}
+
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 12px 8px;
+  gap: 24rpx 16rpx;
 }
 .sum-cell {
   text-align: center;
 }
 .sum-val {
   display: block;
-  font-size: 15px;
+  font-size: 30rpx;
   font-weight: 600;
   color: #333;
 }
 .sum-lab {
   display: block;
-  margin-top: 4px;
-  font-size: 11px;
+  margin-top: 8rpx;
+  font-size: 22rpx;
   color: #999;
-}
-.section-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 15px;
-  font-weight: 600;
-  color: #333;
-}
-.bar {
-  width: 3px;
-  height: 14px;
-  border-radius: 2px;
 }
 
-/* 小程序端 flex 子节点不能用 text，必须用 view 做单元格；宽度用 flex + % 保证横向排列 */
-.ins-table {
-  width: 100%;
-}
-.ins-head,
-.ins-row {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  align-items: center;
-  width: 100%;
-  box-sizing: border-box;
-}
-.ins-head {
-  padding: 10px 0;
-  border-bottom: 1px solid #f0f0f0;
-}
-.ins-row {
-  padding: 10px 0;
-  min-height: 44px;
-}
-.ins-row--alt {
-  background: #fafafa;
-}
-.ins-row--total {
-  border-top: 1px solid #f0f0f0;
-  font-weight: 600;
-}
-.ins-cell {
-  flex-shrink: 0;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: center;
-}
-.ins-cell--name {
-  width: 30%;
-  padding-left: 8px;
-}
-.ins-cell--half {
-  width: 35%;
-  align-items: center;
-  text-align: center;
-}
-.ins-head-text {
-  font-size: 11px;
-  color: #999;
-  text-align: center;
-}
-.ins-cell--name .ins-head-text {
-  text-align: left;
-}
-.ins-body-text {
-  font-size: 13px;
-  color: #333;
-}
-.ins-body-text--bold {
-  font-weight: 600;
-}
-.ins-num {
-  font-size: 13px;
-  color: #333;
-  text-align: center;
-}
-.ins-sub {
-  margin-top: 4px;
-  font-size: 11px;
-  color: #999;
-  text-align: center;
-}
-
+/* 小程序端 flex 子节点不能用 text，必须用 view 做单元格 */
 .month-table {
   width: 100%;
 }
@@ -376,12 +286,12 @@ const INCOME_TAX_BRACKETS = [
   box-sizing: border-box;
 }
 .month-head {
-  padding: 10px 0;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 20rpx 0;
+  border-bottom: 2rpx solid #f0f0f0;
 }
 .month-row {
-  padding: 10px 0;
-  min-height: 44px;
+  padding: 20rpx 0;
+  min-height: 88rpx;
 }
 .month-row--alt {
   background: #fafafa;
@@ -395,7 +305,7 @@ const INCOME_TAX_BRACKETS = [
 }
 .month-cell--narrow {
   width: 14%;
-  padding-left: 8px;
+  padding-left: 16rpx;
 }
 .month-cell--grow {
   flex: 1;
@@ -404,7 +314,7 @@ const INCOME_TAX_BRACKETS = [
   align-items: center;
 }
 .month-head-text {
-  font-size: 11px;
+  font-size: 22rpx;
   color: #999;
   text-align: center;
 }
@@ -412,16 +322,13 @@ const INCOME_TAX_BRACKETS = [
   text-align: left;
 }
 .month-body-text {
-  font-size: 13px;
+  font-size: 26rpx;
   color: #333;
 }
 .month-num {
-  font-size: 13px;
+  font-size: 26rpx;
   color: #333;
   text-align: center;
-}
-.month-num.text-primary {
-  color: var(--wot-primary-6, #007aff);
 }
 
 .pit-table {
@@ -437,12 +344,12 @@ const INCOME_TAX_BRACKETS = [
   box-sizing: border-box;
 }
 .pit-head {
-  padding: 10px 0;
-  border-bottom: 1px solid #f0f0f0;
+  padding: 20rpx 0;
+  border-bottom: 2rpx solid #f0f0f0;
 }
 .pit-row {
-  padding: 10px 0;
-  min-height: 44px;
+  padding: 20rpx 0;
+  min-height: 88rpx;
 }
 .pit-row--alt {
   background: #fafafa;
@@ -456,13 +363,13 @@ const INCOME_TAX_BRACKETS = [
 }
 .pit-cell--level {
   width: 14%;
-  padding-left: 8px;
+  padding-left: 16rpx;
 }
 .pit-cell--range {
   flex: 1;
   width: 0;
   min-width: 0;
-  padding-right: 6px;
+  padding-right: 12rpx;
 }
 .pit-cell--rate {
   width: 18%;
@@ -473,7 +380,7 @@ const INCOME_TAX_BRACKETS = [
   align-items: center;
 }
 .pit-head-text {
-  font-size: 11px;
+  font-size: 22rpx;
   color: #999;
   text-align: center;
 }
@@ -484,14 +391,14 @@ const INCOME_TAX_BRACKETS = [
   text-align: left;
 }
 .pit-body-text {
-  font-size: 13px;
+  font-size: 26rpx;
   color: #333;
 }
 .pit-body-text--range {
   line-height: 1.4;
 }
 .pit-num {
-  font-size: 13px;
+  font-size: 26rpx;
   color: #333;
   text-align: center;
 }

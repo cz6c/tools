@@ -1,4 +1,6 @@
 <script lang="ts" setup>
+import type { FormSchema } from '@wot-ui/ui'
+import type { FormExpose } from '@wot-ui/ui/components/wd-form/types'
 import type { WifiEncryption } from '@/utils/wifi'
 import { useWifiHistoryStore } from '@/store/wifiHistory'
 import { canvasToTempFile, drawQrCode } from '@/utils/drawQrCode'
@@ -15,18 +17,50 @@ definePage({
 const wifiHistoryStore = useWifiHistoryStore()
 
 const canvasId = 'wifiQrCanvas'
-const qrSize = 240
+/** 二维码展示尺寸（rpx），绘制时转为 px */
+const qrSizeRpx = 480
 
-const ssid = ref('')
-const password = ref('')
-const encryption = ref<WifiEncryption>('WPA2')
+const formRef = ref<FormExpose>()
+const formModel = reactive({
+  ssid: '',
+  password: '',
+  encryption: 'WPA2' as WifiEncryption,
+})
+
+const formSchema: FormSchema = {
+  validate(model) {
+    if (!String(model.ssid ?? '').trim())
+      return [{ path: ['ssid'], message: '请输入WiFi名称' }]
+    return []
+  },
+  isRequired(path) {
+    return path === 'ssid'
+  },
+}
+
 const qrGenerated = ref(false)
 const qrText = ref('')
 const saving = ref(false)
 const showEncryptionPicker = ref(false)
 
+const encryptionPickerValue = computed({
+  get: () => [formModel.encryption],
+  set: (value) => {
+    formModel.encryption = value[0] as WifiEncryption
+  },
+})
+
+const qrCanvasStyle = computed(() => ({
+  width: `${qrSizeRpx}rpx`,
+  height: `${qrSizeRpx}rpx`,
+}))
+
+function getQrSizePx() {
+  return uni.upx2px(qrSizeRpx)
+}
+
 const encryptionLabel = computed(
-  () => ENCRYPTION_OPTIONS.find(o => o.value === encryption.value)?.label ?? 'WPA2',
+  () => ENCRYPTION_OPTIONS.find(o => o.value === formModel.encryption)?.label ?? 'WPA2',
 )
 
 onLoad((query) => {
@@ -34,42 +68,36 @@ onLoad((query) => {
   if (id) {
     const item = wifiHistoryStore.findById(id)
     if (item) {
-      ssid.value = item.ssid
-      password.value = item.password
-      encryption.value = item.encryption
+      formModel.ssid = item.ssid
+      formModel.password = item.password
+      formModel.encryption = item.encryption
       return
     }
   }
   if (query?.ssid)
-    ssid.value = decodeURIComponent(String(query.ssid))
+    formModel.ssid = decodeURIComponent(String(query.ssid))
   if (query?.password)
-    password.value = decodeURIComponent(String(query.password))
+    formModel.password = decodeURIComponent(String(query.password))
   if (query?.encryption)
-    encryption.value = decodeURIComponent(String(query.encryption)) as WifiEncryption
+    formModel.encryption = decodeURIComponent(String(query.encryption)) as WifiEncryption
 })
 
-function pickEncryption(value: WifiEncryption) {
-  encryption.value = value
-  showEncryptionPicker.value = false
-}
-
 async function handleGenerate() {
-  const name = ssid.value.trim()
-  if (!name) {
-    uni.showToast({ title: '请输入WiFi名称', icon: 'none' })
+  const { valid } = await formRef.value!.validate()
+  if (!valid)
     return
-  }
 
   const info = {
-    ssid: name,
-    password: password.value,
-    encryption: encryption.value,
+    ssid: formModel.ssid.trim(),
+    password: formModel.password,
+    encryption: formModel.encryption,
   }
   qrText.value = buildWifiQr(info)
   qrGenerated.value = true
 
   await nextTick()
-  await drawQrCode(canvasId, qrText.value, qrSize)
+  const sizePx = getQrSizePx()
+  await drawQrCode(canvasId, qrText.value, sizePx)
   wifiHistoryStore.add(info, 'generated')
   uni.showToast({ title: '二维码已生成', icon: 'success' })
 }
@@ -79,7 +107,8 @@ async function saveToAlbum() {
     return
   saving.value = true
   try {
-    const tempPath = await canvasToTempFile(canvasId, qrSize)
+    const sizePx = getQrSizePx()
+    const tempPath = await canvasToTempFile(canvasId, sizePx)
     await new Promise<void>((resolve, reject) => {
       uni.saveImageToPhotosAlbum({
         filePath: tempPath,
@@ -121,151 +150,90 @@ function handleShare() {
 </script>
 
 <template>
-  <view class="page">
-    <wd-cell-group border custom-class="form-group">
-      <wd-cell title="WiFi名称">
+  <view class="page-shell px-32rpx pb-80rpx pt-32rpx">
+    <wd-form
+      ref="formRef"
+      :model="formModel"
+      :schema="formSchema"
+      center
+      border
+      error-type="toast"
+      :title-width="100"
+      value-align="right"
+      custom-class="card-rounded generate-form"
+    >
+      <wd-form-item title="WiFi名称" prop="ssid">
         <wd-input
-          v-model="ssid"
+          v-model="formModel.ssid"
           align-right
           placeholder="请输入网络名称（SSID）"
-          custom-class="cell-input"
+          custom-class="flex-1"
         />
-      </wd-cell>
-      <wd-cell title="密码">
+      </wd-form-item>
+      <wd-form-item title="密码" prop="password">
         <wd-input
-          v-model="password"
+          v-model="formModel.password"
           align-right
           show-password
           placeholder="无密码可留空"
-          custom-class="cell-input"
+          custom-class="flex-1"
         />
-      </wd-cell>
-      <wd-cell
+      </wd-form-item>
+      <wd-form-item
         title="加密类型"
-        :value="encryptionLabel"
+        prop="encryption"
         is-link
+        :value="encryptionLabel"
+        placeholder="请选择加密类型"
         @click="showEncryptionPicker = true"
       />
-    </wd-cell-group>
+    </wd-form>
+
+    <wd-picker
+      v-model="encryptionPickerValue"
+      v-model:visible="showEncryptionPicker"
+      :columns="ENCRYPTION_OPTIONS"
+      title="加密类型"
+      root-portal
+    />
 
     <wd-button
-
       round block
       size="large"
       type="primary"
-      custom-class="generate-btn"
+      custom-class="mt-40rpx"
       @click="handleGenerate"
     >
       生成二维码
     </wd-button>
 
-    <view v-if="qrGenerated" class="qr-section">
-      <view class="qr-wrap">
+    <view v-if="qrGenerated" class="mt-48rpx rounded-24rpx bg-white p-48rpx text-center">
+      <view class="center">
         <canvas
           :id="canvasId"
           :canvas-id="canvasId"
-          class="qr-canvas"
-          :style="{ width: `${qrSize}px`, height: `${qrSize}px` }"
+          class="block"
+          :style="qrCanvasStyle"
         />
       </view>
-      <view class="qr-actions">
+      <view class="flex-actions mt-40rpx">
         <wd-button
-
-          plain round block
+          variant="plain" round block
           :loading="saving"
-          custom-class="qr-action-btn"
+          custom-class="flex-1"
           @click="saveToAlbum"
         >
           保存到相册
         </wd-button>
         <wd-button
-
           round block
           type="primary"
-          custom-class="qr-action-btn"
+          custom-class="flex-1"
           @click="handleShare"
         >
           分享
         </wd-button>
       </view>
     </view>
-
-    <wd-popup
-      v-model="showEncryptionPicker"
-      position="bottom"
-      root-portal
-      :safe-area-inset-bottom="true"
-      closable
-      lock-scroll
-    >
-      <view class="picker-sheet-title">
-        加密类型
-      </view>
-      <wd-cell-group border>
-        <wd-cell
-          v-for="opt in ENCRYPTION_OPTIONS"
-          :key="opt.value"
-          :title="opt.label"
-          clickable
-          @click="pickEncryption(opt.value)"
-        />
-      </wd-cell-group>
-    </wd-popup>
   </view>
 </template>
-
-<style scoped lang="scss">
-.page {
-  min-height: 100vh;
-  background: #f5f7fa;
-  padding: 16px 16px 40px;
-}
-
-:deep(.form-group) {
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-:deep(.cell-input) {
-  flex: 1;
-}
-
-:deep(.generate-btn) {
-  margin-top: 20px;
-}
-
-.picker-sheet-title {
-  padding: 16px;
-  font-size: 16px;
-  font-weight: 600;
-  text-align: center;
-  color: #333;
-}
-
-.qr-section {
-  margin-top: 24px;
-  background: #fff;
-  border-radius: 12px;
-  padding: 24px 16px;
-  text-align: center;
-}
-
-.qr-wrap {
-  display: flex;
-  justify-content: center;
-}
-
-.qr-canvas {
-  display: block;
-}
-
-.qr-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 20px;
-}
-
-:deep(.qr-action-btn) {
-  flex: 1;
-}
-</style>

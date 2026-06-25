@@ -25,8 +25,9 @@ alwaysApply: false
 | 场景 | ❌ 禁止 | ✅ 使用 |
 |------|--------|--------|
 | 按钮 | `<button>` | `wd-button` |
-| 输入框 | `<input>` | `wd-input`（表单内配合 `wd-cell`） |
-| 表单行/列表 | 手写 flex 行 | `wd-cell` + `wd-cell-group` |
+| 表单 | `wd-cell-group` + `wd-cell` 手写表单 | `wd-form` + `wd-form-item`（数据录入、校验） |
+| 输入框 | `<input>` | `wd-input` |
+| 列表/只读展示 | 手写 flex 行 | `wd-cell` + `wd-cell-group`（历史列表、工具入口等非表单场景） |
 | 弹层/抽屉 | 手写遮罩 div | `wd-popup` |
 | 确认/提示框 | 仅 `uni.showModal` | `useMessage` / `MessageBox`（简单场景可用 `uni.showModal`） |
 | Toast | 仅 `uni.showToast` | `useToast`（简单一行提示可用 `uni.showToast`） |
@@ -40,41 +41,84 @@ alwaysApply: false
 | 图标 | emoji/文字代替 | `wd-icon` |
 | 分割线 | 手写 border | `wd-divider` |
 
-## 写法示例
+## 表单写法（必须遵守）
+
+数据录入页面使用 **`wd-form` + `wd-form-item`**，不再用 `wd-cell-group` + `wd-cell` 拼表单。
+
+- `wd-form` 绑定 `:model`，需要校验时传 `:schema`（自定义 `FormSchema` 或 `zodAdapter`）
+- 公共样式在 `wd-form` 上配置：`center`、`value-align="right"`、`:title-width="100"`、`border`；多区块时可内嵌 `wd-cell-group`
+- `wd-form-item` 用 `prop` 对应 model 字段；**单列选择**用 `is-link` + `:value` 触发，配合外部 `wd-picker`（`v-model` 为数组、`v-model:visible` 控制弹层）
+- 提交前调用 `formRef.validate()`，简单提示用 `error-type="toast"`
 
 ```vue
-<!-- ❌ BAD：原生表单 -->
-<input v-model="ssid" placeholder="请输入 WiFi 名称" />
-<button @click="submit">提交</button>
+<script lang="ts" setup>
+import type { FormSchema } from '@wot-ui/ui'
+import type { FormExpose } from '@wot-ui/ui/components/wd-form/types'
 
-<!-- ✅ GOOD：wot-ui 表单 -->
-<wd-cell-group border>
-  <wd-cell title="WiFi 名称">
-    <wd-input v-model="ssid" placeholder="请输入 WiFi 名称" />
-  </wd-cell>
-</wd-cell-group>
-<wd-button type="primary" block @click="submit">提交</wd-button>
-```
+const formRef = ref<FormExpose>()
+const formModel = reactive({ ssid: '', encryption: 'WPA2' })
 
-```vue
-<!-- ❌ BAD：弹层内原生按钮 -->
-<wd-popup v-model="visible">
-  <button @click="confirm">确定</button>
-</wd-popup>
+const formSchema: FormSchema = {
+  validate(model) {
+    if (!String(model.ssid ?? '').trim())
+      return [{ path: ['ssid'], message: '请输入 WiFi 名称' }]
+    return []
+  },
+  isRequired(path) {
+    return path === 'ssid'
+  },
+}
 
-<!-- ✅ GOOD -->
-<wd-popup v-model="visible">
-  <wd-button type="primary" @click="confirm">确定</wd-button>
-</wd-popup>
+async function submit() {
+  const { valid } = await formRef.value!.validate()
+  if (!valid) return
+  // ...
+}
+</script>
+
+<template>
+  <wd-form
+    ref="formRef"
+    :model="formModel"
+    :schema="formSchema"
+    center
+    border
+    value-align="right"
+    error-type="toast"
+    :title-width="100"
+    custom-class="card-rounded"
+  >
+    <wd-form-item title="WiFi 名称" prop="ssid">
+      <wd-input v-model="formModel.ssid" align-right placeholder="请输入 WiFi 名称" />
+    </wd-form-item>
+    <wd-form-item
+      title="加密类型"
+      prop="encryption"
+      is-link
+      :value="encryptionLabel"
+      placeholder="请选择加密类型"
+      @click="showEncryptionPicker = true"
+    />
+  </wd-form>
+  <wd-picker
+    v-model="encryptionPickerValue"
+    v-model:visible="showEncryptionPicker"
+    :columns="ENCRYPTION_OPTIONS"
+    title="加密类型"
+    root-portal
+  />
+</template>
 ```
 
 ## 样式约定
 
-- 组件外观优先用 wot-ui 的 `type`、`size`、`plain`、`round` 等 props 控制
+- 组件外观优先用 wot-ui 的 `type`、`size`、`variant`（如 `variant="plain"`）、`round` 等 props 控制
 - 布局与间距用 **UnoCSS** 原子类（见 `styling-css-patterns.mdc`）
 - 需要微调时用 `custom-class` / `custom-style`，不要覆盖组件内部结构
+- 表单内 `is-link` 选择行与输入框混排时，给 `.wd-cell.is-link .wd-cell__body` 设 `min-height: var(--wot-input-inner-height)`
 
 ## 参考实现
 
-- 表单 + 弹层：`src/pages-sub/salary/calc.vue`
+- WiFi 生成表单：`src/pages/generate/generate.vue`
+- 复杂表单 + 弹层：`src/pages-sub/salary/calc.vue`
 - 列表 + 空态 + 滑动删除：`src/pages-sub/salary/history.vue`

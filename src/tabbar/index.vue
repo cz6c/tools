@@ -76,9 +76,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <view v-if="customTabbarEnable" class="h-50px pb-safe">
-    <view class="border-and-fixed bg-white" @touchmove.stop.prevent>
-      <view class="h-50px flex items-center">
+  <view v-if="customTabbarEnable" class="h-100rpx pb-safe">
+    <view class="fixed bottom-0 left-0 right-0 z-1000 box-border border-t border-#eee bg-white" @touchmove.stop.prevent>
+      <view class="h-100rpx flex items-center">
         <view
           v-for="(item, index) in tabbarList" :key="index"
           class="flex flex-1 flex-col items-center justify-center"
@@ -101,19 +101,10 @@ onMounted(() => {
 </template>
 
 <style scoped lang="scss">
-.border-and-fixed {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-  border-top: 1px solid #eee;
-  box-sizing: border-box;
-}
 // 中间鼓包的样式
 .bulge {
   position: absolute;
-  top: -20px;
+  top: -40rpx;
   left: 50%;
   transform-origin: top center;
   transform: translateX(-50%) scale(0.5) translateY(-33%);
@@ -124,7 +115,7 @@ onMounted(() => {
   height: 250rpx;
   border-radius: 50%;
   background-color: #fff;
-  box-shadow: inset 0 0 0 1px #fefefe;
+  box-shadow: inset 0 0 0 2rpx #fefefe;
 
   &:active {
     // opacity: 0.8;

@@ -45,7 +45,8 @@
 </style>
 
 ## 响应式设计
-- 使用 rpx 单位适配不同屏幕
+- 使用 rpx 单位适配不同屏幕（750 设计稿：**N px → 2N rpx**，如原 24px 写 `px-48rpx`）
+- UnoCSS 类名示例：`px-48rpx`、`text-28rpx`，勿用 `px-24px`
 - 支持横屏和竖屏布局
 - 使用 flexbox 和 grid 布局
 - 考虑不同平台的样式差异

@@ -41,20 +41,20 @@ function openTool(url: string) {
 </script>
 
 <template>
-  <view class="page">
-    <view class="header header--gradient pt-safe">
-      <view class="header-bar">
-        <view class="header-bar__title">
+  <view class="page-shell">
+    <view class="workbench-header bg-primary pt-safe">
+      <view class="pb-64rpx text-center text-white">
+        <view class="text-34rpx font-500 leading-88rpx">
           工具工作台
         </view>
-        <view class="header-bar__desc">
+        <view class="-mt-8rpx text-26rpx opacity-85">
           更多实用工具入口
         </view>
       </view>
     </view>
 
-    <view class="content px-12px pb-12px -mt-12px">
-      <wd-cell-group border custom-class="tool-group">
+    <view class="px-24rpx pb-24rpx -mt-24rpx">
+      <wd-cell-group center border custom-class="card-rounded" :title-width="100">
         <wd-cell
           v-for="item in tools"
           :key="item.url"
@@ -68,39 +68,3 @@ function openTool(url: string) {
     </view>
   </view>
 </template>
-
-<style scoped lang="scss">
-.page {
-  min-height: 100vh;
-  background: #f5f7fa;
-}
-
-.header--gradient {
-  background-image: linear-gradient(#007aff 10%, #007aff 100%);
-
-  .header-bar {
-    padding-bottom: 32px;
-    text-align: center;
-    color: #fff;
-  }
-}
-
-.header-bar__title {
-  font-size: 17px;
-  font-weight: 500;
-  line-height: 44px;
-}
-
-.header-bar__desc {
-  margin-top: -4px;
-  font-size: 13px;
-  opacity: 0.85;
-}
-
-:deep(.tool-group) {
-  border-radius: 12px;
-  overflow: hidden;
-  background: #fff;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-}
-</style>

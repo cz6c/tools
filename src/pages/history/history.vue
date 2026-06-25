@@ -71,19 +71,19 @@ function confirmClear() {
 </script>
 
 <template>
-  <view class="page">
+  <view class="page-shell px-32rpx pb-80rpx pt-24rpx">
     <wd-search
       v-model="keyword"
       placeholder="搜索 WiFi 名称"
       hide-cancel
-      custom-class="history-search"
+      custom-class="mb-16rpx"
     />
 
-    <view v-if="list.length > 0" class="toolbar">
-      <text class="toolbar-count">
+    <view v-if="list.length > 0" class="flex items-center justify-between px-8rpx py-16rpx pb-24rpx">
+      <text class="text-26rpx text-#999">
         {{ keywordTrimmed ? `找到 ${filteredList.length} 条` : `共 ${list.length} 条` }}
       </text>
-      <wd-button plain size="small" custom-class="clear-btn" @click="confirmClear">
+      <wd-button variant="plain" size="small" custom-class="clear-btn" @click="confirmClear">
         清空
       </wd-button>
     </view>
@@ -98,7 +98,7 @@ function confirmClear() {
       tip="未找到匹配的 WiFi 记录"
     />
 
-    <wd-cell-group v-else border custom-class="history-group">
+    <wd-cell-group center v-else border custom-class="card-rounded" :title-width="100">
       <wd-cell
         v-for="item in filteredList"
         :key="item.id"
@@ -108,14 +108,13 @@ function confirmClear() {
         @click="openItem(item)"
       >
         <template #label>
-          <view class="item-tags">
-            <wd-tag type="default" mark custom-class="meta-tag">
+          <view class="mt-8rpx flex gap-12rpx">
+            <wd-tag type="default" mark>
               {{ encryptionLabel(item.encryption) }}
             </wd-tag>
             <wd-tag
               :type="item.type === 'scanned' ? 'primary' : 'success'"
               mark
-              custom-class="meta-tag"
             >
               {{ typeLabel(item.type) }}
             </wd-tag>
@@ -127,45 +126,8 @@ function confirmClear() {
 </template>
 
 <style scoped lang="scss">
-.page {
-  min-height: 100vh;
-  background: #f5f7fa;
-  padding: 12px 16px 40px;
-}
-
-:deep(.history-search) {
-  margin-bottom: 8px;
-}
-
-.toolbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 4px 12px;
-}
-
 :deep(.clear-btn) {
   color: #ff4d4f !important;
   border-color: #ff4d4f !important;
-}
-
-.toolbar-count {
-  font-size: 13px;
-  color: #999;
-}
-
-:deep(.history-group) {
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.item-tags {
-  display: flex;
-  gap: 6px;
-  margin-top: 4px;
-}
-
-:deep(.meta-tag) {
-  margin-right: 0;
 }
 </style>

@@ -88,41 +88,38 @@ function goHistory() {
 </script>
 
 <template>
-  <view class="page">
-    <view class="header">
-      <view class="logo-wrap">
-        <wd-icon name="link" size="56px" color="#fff" />
+  <view class="home-page px-48rpx pb-80rpx">
+    <view class="h-360rpx flex flex-col items-center justify-center text-white">
+      <view class="mb-32rpx center">
+        <wd-icon name="link" size="112rpx" color="#fff" />
       </view>
-      <view class="title">
+      <view class="text-56rpx font-700 tracking-2rpx">
         WiFi小助手
       </view>
-      <view class="subtitle">
+      <view class="mt-16rpx text-28rpx opacity-85">
         扫码连网 · 分享 WiFi
       </view>
     </view>
 
-    <view class="actions">
+    <view class="mt-80rpx flex flex-col gap-32rpx">
       <wd-button
-
         round block
         size="large"
-        custom-class="hero-btn hero-btn-primary"
+        variant="plain"
         @click="handleScan"
       >
-        <view class="hero-btn-inner">
-          <wd-icon name="camera" size="20px" />
+        <view class="center gap-20rpx">
+          <wd-icon name="camera" size="40rpx" />
           <text>扫一扫</text>
         </view>
       </wd-button>
       <wd-button
-
         size="large"
-        round plain block
-        custom-class="hero-btn hero-btn-secondary"
+        round block
         @click="goGenerate"
       >
-        <view class="hero-btn-inner">
-          <wd-icon name="picture" size="20px" />
+        <view class="center gap-20rpx">
+          <wd-icon name="picture" size="40rpx" />
           <text>生成我的WiFi码</text>
         </view>
       </wd-button>
@@ -130,28 +127,29 @@ function goHistory() {
 
     <wd-cell
       v-if="historyCount > 0"
+      center
       title="历史记录"
       is-link
-      center
-      custom-class="history-cell"
+      :title-width="100"
+      custom-class="mt-80rpx rounded-24rpx overflow-hidden shadow-sm"
       @click="goHistory"
     >
       <wd-badge :value="historyCount" />
     </wd-cell>
 
-    <wd-popup v-model="showPrivacy" :close-on-click-modal="false" custom-class="privacy-popup">
-      <view class="privacy-box">
-        <view class="privacy-title">
+    <wd-popup v-model="showPrivacy" :close-on-click-modal="false">
+      <view class="w-600rpx rounded-24rpx bg-white p-40rpx">
+        <view class="mb-24rpx text-center text-34rpx text-#333 font-600">
           用户协议与隐私政策
         </view>
-        <scroll-view scroll-y class="privacy-scroll">
-          <text class="privacy-content">{{ PRIVACY_CONTENT }}</text>
+        <scroll-view scroll-y class="max-h-560rpx">
+          <text class="whitespace-pre-wrap text-26rpx text-#666 leading-relaxed">{{ PRIVACY_CONTENT }}</text>
         </scroll-view>
-        <view class="privacy-actions">
-          <wd-button plain custom-class="privacy-btn" @click="rejectPrivacy">
+        <view class="mt-32rpx flex gap-24rpx">
+          <wd-button variant="plain" custom-class="flex-1" @click="rejectPrivacy">
             不同意
           </wd-button>
-          <wd-button type="primary" custom-class="privacy-btn" @click="agreePrivacy">
+          <wd-button type="primary" custom-class="flex-1" @click="agreePrivacy">
             同意并继续
           </wd-button>
         </view>
@@ -161,102 +159,8 @@ function goHistory() {
 </template>
 
 <style scoped lang="scss">
-.page {
+.home-page {
   min-height: 100vh;
-  background: linear-gradient(180deg, #007aff 0%, #007aff 180px, #f5f7fa 180px);
-  padding: 0 24px 40px;
-}
-
-.header {
-  padding-top: 48px;
-  text-align: center;
-  color: #fff;
-}
-
-.logo-wrap {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 16px;
-}
-
-.title {
-  font-size: 28px;
-  font-weight: 700;
-  letter-spacing: 1px;
-}
-
-.subtitle {
-  margin-top: 8px;
-  font-size: 14px;
-  opacity: 0.85;
-}
-
-.actions {
-  margin-top: 48px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.hero-btn-inner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-}
-
-:deep(.hero-btn-primary) {
-  background: #fff !important;
-  color: #007aff !important;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-}
-
-:deep(.hero-btn-secondary) {
-  background: rgba(255, 255, 255, 0.15) !important;
-  color: #fff !important;
-  border: 2px solid rgba(255, 255, 255, 0.6) !important;
-}
-
-:deep(.history-cell) {
-  margin-top: 40px;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.privacy-box {
-  width: 300px;
-  padding: 20px;
-  background: #fff;
-  border-radius: 12px;
-}
-
-.privacy-title {
-  font-size: 17px;
-  font-weight: 600;
-  text-align: center;
-  margin-bottom: 12px;
-  color: #333;
-}
-
-.privacy-scroll {
-  max-height: 280px;
-}
-
-.privacy-content {
-  font-size: 13px;
-  line-height: 1.7;
-  color: #666;
-  white-space: pre-wrap;
-}
-
-.privacy-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 16px;
-}
-
-:deep(.privacy-btn) {
-  flex: 1;
+  background: linear-gradient(180deg, var(--wot-primary-6) 0%, var(--wot-primary-6) 360rpx, #f5f5f5 360rpx);
 }
 </style>

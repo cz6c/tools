@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import type { ComponentPublicInstance } from 'vue'
-import { getCurrentInstance, nextTick, ref, watch } from 'vue'
+import { getCurrentInstance, nextTick, reactive, ref, watch } from 'vue'
 
 defineOptions({ name: 'IdWatermark' })
 
@@ -19,10 +19,17 @@ const imagePath = ref('')
 const imgW = ref(0)
 const imgH = ref(0)
 
-const watermarkText = ref('仅用于办理 XXX 使用')
-
 type WatermarkColor = '#ffffff' | '#000000' | '#E53935'
-const color = ref<WatermarkColor>('#000000')
+
+const formModel = reactive({
+  watermarkText: '仅用于办理 XXX 使用',
+  color: '#000000' as WatermarkColor,
+  opacity: 20,
+  spacing: 59,
+  fontSize: 20,
+  angleDeg: -45 as -30 | -45 | -60,
+})
+
 const colors: { value: WatermarkColor, label: string }[] = [
   { value: '#ffffff', label: '白' },
   { value: '#000000', label: '黑' },
@@ -35,13 +42,8 @@ const anglePresets = [
   { deg: -45, title: '常用' },
   { deg: -60, title: '较陡' },
 ] as const
-const angleDeg = ref<-30 | -45 | -60>(-45)
 
-const opacity = ref(20)
-const spacing = ref(59)
-const fontSize = ref(20)
-
-const canvasStyle = ref<{ width: string, height: string }>({ width: '100%', height: '200px' })
+const canvasStyle = ref<{ width: string, height: string }>({ width: '100%', height: '400rpx' })
 const canvasW = ref(300)
 const canvasH = ref(300)
 
@@ -61,16 +63,16 @@ function scheduleDraw() {
 }
 
 watch(
-  [watermarkText, color, opacity, spacing, fontSize, angleDeg],
+  () => [formModel.watermarkText, formModel.color, formModel.opacity, formModel.spacing, formModel.fontSize, formModel.angleDeg],
   () => scheduleDraw(),
 )
 
 function pickColor(value: WatermarkColor) {
-  color.value = value
+  formModel.color = value
 }
 
 function pickAngle(deg: -30 | -45 | -60) {
-  angleDeg.value = deg
+  formModel.angleDeg = deg
 }
 
 function choosePhoto() {
@@ -138,16 +140,16 @@ function drawCanvas() {
   ctx.clearRect(0, 0, cw, ch)
   ctx.drawImage(imagePath.value, ox, oy, dw, dh)
 
-  const text = (watermarkText.value || ' ').trim() || ' '
-  const fs = Math.max(8, fontSize.value)
-  const space = Math.max(4, spacing.value)
+  const text = (formModel.watermarkText || ' ').trim() || ' '
+  const fs = Math.max(8, formModel.fontSize)
+  const space = Math.max(4, formModel.spacing)
 
   ctx.save()
-  ctx.setGlobalAlpha(Math.min(1, Math.max(0.05, opacity.value / 100)))
-  ctx.setFillStyle(color.value)
+  ctx.setGlobalAlpha(Math.min(1, Math.max(0.05, formModel.opacity / 100)))
+  ctx.setFillStyle(formModel.color)
   ctx.setFontSize(fs)
 
-  const deg = angleDeg.value
+  const deg = formModel.angleDeg
   const rad = (deg * Math.PI) / 180
   ctx.translate(cw / 2, ch / 2)
   ctx.rotate(rad)
@@ -234,43 +236,50 @@ function saveWatermarked() {
 </script>
 
 <template>
-  <view class="page pb-safe">
+  <view class="page-shell pb-safe">
     <wd-notice-bar
       text="小程序不会存储您的原始照片及加了水印后的照片，请放心使用！"
       prefix="notification"
       type="warning"
     />
 
-    <view class="preview-outer">
-      <view class="preview-canvas-wrap checkerboard">
+    <view class="px-32rpx pt-24rpx">
+      <view class="preview-canvas-wrap checkerboard relative w-full min-h-360rpx flex center overflow-hidden rounded-16rpx">
         <canvas
           :id="canvasId"
           :canvas-id="canvasId"
-          class="preview-canvas"
+          class="block max-w-full"
           :style="canvasStyle"
         />
-        <view v-if="!imagePath" class="empty-wrap">
+        <view v-if="!imagePath" class="absolute inset-0 center pointer-events-none">
           <wd-empty tip="请先选择证件照片" />
         </view>
       </view>
     </view>
 
-    <wd-cell-group border custom-class="panel-group">
-      <wd-cell title="文字" :title-width="52" center>
+    <wd-form
+      :model="formModel"
+      center
+      border
+      value-align="right"
+      :title-width="100"
+      custom-class="card-rounded mx-32rpx mt-32rpx"
+    >
+      <wd-form-item title="文字" prop="watermarkText">
         <wd-input
-          v-model="watermarkText"
+          v-model="formModel.watermarkText"
           align-right
           placeholder="输入水印内容"
-          custom-class="panel-input"
+          custom-class="flex-1"
         />
-      </wd-cell>
+      </wd-form-item>
 
-      <wd-cell title="颜色" :title-width="52" center custom-class="tag-cell">
-        <view class="tag-row">
+      <wd-form-item title="颜色" prop="color">
+        <view class="inline-flex w-full flex-nowrap items-center justify-end gap-16rpx">
           <wd-tag
             v-for="c in colors"
             :key="c.value"
-            :type="color === c.value ? 'primary' : 'default'"
+            :type="formModel.color === c.value ? 'primary' : 'default'"
             variant="plain"
             round
             @click="pickColor(c.value)"
@@ -278,24 +287,24 @@ function saveWatermarked() {
             {{ c.label }}
           </wd-tag>
         </view>
-      </wd-cell>
+      </wd-form-item>
 
-      <wd-cell title="透明度" :title-width="52">
+      <wd-form-item title="透明度" prop="opacity">
         <wd-slider
-          v-model="opacity"
+          v-model="formModel.opacity"
           :min="8"
           :max="100"
           :step="1"
-          active-color="#007aff"
+          active-color="var(--wot-primary-6)"
         />
-      </wd-cell>
+      </wd-form-item>
 
-      <wd-cell title="角度" :title-width="52" center custom-class="tag-cell">
-        <view class="tag-row">
+      <wd-form-item title="角度" prop="angleDeg">
+        <view class="inline-flex w-full flex-nowrap items-center justify-end gap-16rpx">
           <wd-tag
             v-for="a in anglePresets"
             :key="a.deg"
-            :type="angleDeg === a.deg ? 'primary' : 'default'"
+            :type="formModel.angleDeg === a.deg ? 'primary' : 'default'"
             variant="plain"
             round
             @click="pickAngle(a.deg)"
@@ -303,39 +312,38 @@ function saveWatermarked() {
             {{ a.title }}
           </wd-tag>
         </view>
-      </wd-cell>
+      </wd-form-item>
 
-      <wd-cell title="间距" :title-width="52">
+      <wd-form-item title="间距" prop="spacing">
         <wd-slider
-          v-model="spacing"
+          v-model="formModel.spacing"
           :min="24"
           :max="120"
           :step="1"
-          active-color="#007aff"
+          active-color="var(--wot-primary-6)"
         />
-      </wd-cell>
+      </wd-form-item>
 
-      <wd-cell title="字体大小" :title-width="64">
+      <wd-form-item title="字体大小" prop="fontSize">
         <wd-slider
-          v-model="fontSize"
+          v-model="formModel.fontSize"
           :min="12"
           :max="56"
           :step="1"
-          active-color="#007aff"
+          active-color="var(--wot-primary-6)"
         />
-      </wd-cell>
-    </wd-cell-group>
+      </wd-form-item>
+    </wd-form>
 
-    <view class="actions">
-      <wd-button plain round block custom-class="action-btn" @click="choosePhoto">
+    <view class="flex-actions px-32rpx pt-16rpx">
+      <wd-button variant="plain" round block custom-class="flex-1" @click="choosePhoto">
         选择照片
       </wd-button>
       <wd-button
-
         round block
         type="primary"
         :loading="saving"
-        custom-class="action-btn"
+        custom-class="flex-1"
         @click="saveWatermarked"
       >
         保存水印照片
@@ -345,76 +353,16 @@ function saveWatermarked() {
 </template>
 
 <style scoped lang="scss">
-.page {
-  min-height: 100vh;
-  background: #f5f7fa;
-}
-
-.preview-outer {
-  padding: 12px 16px 0;
-}
-
-.preview-canvas-wrap {
-  position: relative;
-  width: 100%;
-  min-height: 180px;
-  border-radius: 8px;
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 .checkerboard {
   background-color: #e8e8e8;
   background-image:
     linear-gradient(45deg, #f0f0f0 25%, transparent 25%), linear-gradient(-45deg, #f0f0f0 25%, transparent 25%),
     linear-gradient(45deg, transparent 75%, #f0f0f0 75%), linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
-  background-size: 16px 16px;
+  background-size: 32rpx 32rpx;
   background-position:
     0 0,
-    0 8px,
-    8px -8px,
-    -8px 0;
-}
-
-.preview-canvas {
-  display: block;
-  max-width: 100%;
-}
-
-.empty-wrap {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-}
-
-:deep(.panel-group) {
-  margin: 16px;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-}
-
-.tag-row {
-  display: inline-flex;
-  flex-wrap: nowrap;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 8px;
-  width: 100%;
-}
-
-.actions {
-  display: flex;
-  gap: 12px;
-  padding: 8px 16px 0;
-}
-
-:deep(.action-btn) {
-  flex: 1;
+    0 16rpx,
+    16rpx -16rpx,
+    -16rpx 0;
 }
 </style>

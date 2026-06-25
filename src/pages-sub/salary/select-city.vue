@@ -46,8 +46,8 @@ function selectCity(id: string) {
 </script>
 
 <template>
-  <view class="city-page">
-    <view class="city-search">
+  <view class="page-shell-white flex flex-col h-screen">
+    <view class="shrink-0 px-24rpx pb-24rpx pt-16rpx">
       <wd-search
         v-model="keyword"
         placeholder="请输入城市名（中文）"
@@ -55,30 +55,30 @@ function selectCity(id: string) {
       />
     </view>
 
-    <scroll-view v-if="keywordTrimmed" scroll-y class="city-scroll">
-      <view v-if="filtered.length === 0" class="city-empty">
+    <scroll-view v-if="keywordTrimmed" scroll-y class="city-select__scroll">
+      <view v-if="filtered.length === 0" class="px-32rpx py-96rpx text-center text-28rpx text-#999">
         暂无匹配城市
       </view>
       <view
         v-for="c in filtered"
         :key="c.id"
-        class="city-row"
+        class="city-select__row"
         @click="selectCity(c.id)"
       >
         {{ c.name }}
       </view>
     </scroll-view>
 
-    <wd-index-bar v-else class="city-index-bar">
-      <view class="hot-section">
-        <text class="hot-title">
+    <wd-index-bar v-else class="city-select__scroll">
+      <view class="px-24rpx pb-40rpx pt-8rpx">
+        <text class="mb-24rpx block text-26rpx text-#666">
           热门城市
         </text>
-        <view class="hot-grid">
+        <view class="grid grid-cols-4 gap-20rpx">
           <view
             v-for="c in hotList"
             :key="c.id"
-            class="hot-cell"
+            class="city-select__hot-cell"
             @click="selectCity(c.id)"
           >
             {{ c.name }}
@@ -90,7 +90,7 @@ function selectCity(id: string) {
         <view
           v-for="c in grouped[letter]"
           :key="c.id"
-          class="city-row"
+          class="city-select__row"
           @click="selectCity(c.id)"
         >
           {{ c.name }}
@@ -101,63 +101,28 @@ function selectCity(id: string) {
 </template>
 
 <style scoped lang="scss">
-.city-page {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  background: #fff;
-}
-.city-search {
-  flex-shrink: 0;
-  padding: 8px 12px 12px;
-  background: #fff;
-}
-.city-scroll {
-  flex: 1;
-  height: 0;
-  background: #fff;
-}
-.city-index-bar {
+.city-select__scroll {
   flex: 1;
   height: 0;
   min-height: 0;
 }
-.hot-section {
-  padding: 4px 12px 20px;
+
+.city-select__row {
+  padding: 28rpx 32rpx;
+  border-bottom: 2rpx solid #f0f0f0;
+  font-size: 30rpx;
+  color: #333;
   background: #fff;
 }
-.hot-title {
-  display: block;
-  margin-bottom: 12px;
-  font-size: 13px;
-  color: #666;
-}
-.hot-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
-}
-.hot-cell {
+
+.city-select__hot-cell {
   box-sizing: border-box;
-  padding: 12px 6px;
-  border: 1px solid #e8e8e8;
-  border-radius: 8px;
-  font-size: 13px;
+  padding: 24rpx 12rpx;
+  border: 2rpx solid #e8e8e8;
+  border-radius: 16rpx;
+  font-size: 26rpx;
   color: #333;
   text-align: center;
   background: #fff;
-}
-.city-row {
-  padding: 14px 16px;
-  border-bottom: 1px solid #f0f0f0;
-  font-size: 15px;
-  color: #333;
-  background: #fff;
-}
-.city-empty {
-  padding: 48px 16px;
-  font-size: 14px;
-  color: #999;
-  text-align: center;
 }
 </style>

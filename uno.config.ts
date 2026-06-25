@@ -69,7 +69,14 @@ export default defineConfig({
   ],
   shortcuts: [
     {
-      center: 'flex justify-center items-center',
+      'center': 'flex justify-center items-center',
+      'page-shell': 'min-h-screen bg-page',
+      'page-shell-white': 'min-h-screen bg-white',
+      'flex-actions': 'flex gap-24rpx',
+      'card-rounded': 'rounded-24rpx overflow-hidden bg-white shadow-sm',
+      'picker-title': 'p-32rpx text-32rpx font-600 text-center text-#333 border-b border-#f0f0f0',
+      'section-title': 'flex items-center gap-16rpx text-30rpx font-600 text-#333',
+      'section-bar': 'w-6rpx h-28rpx rounded-4rpx bg-primary shrink-0',
     },
   ],
   // 动态图标需要在这里配置，或者写在vue页面中注释掉
@@ -100,6 +107,7 @@ export default defineConfig({
     colors: {
       /** 主题色，用法如: text-primary */
       primary: 'var(--wot-primary-6,#007aff)',
+      page: '#f5f5f5',
     },
     fontSize: {
       /** 提供更小号的字体，用法如：text-2xs */
