@@ -2,7 +2,7 @@
 import { storeToRefs } from 'pinia'
 import { PRIVACY_AGREED_KEY, PRIVACY_CONTENT } from '@/constants/privacy'
 import { useWifiHistoryStore } from '@/store/wifiHistory'
-import { parseWifiQr } from '@/utils/wifi'
+import { attemptConnectWifi, parseWifiQr, toScanResultQuery } from '@/utils/wifi'
 
 defineOptions({ name: 'Home' })
 
@@ -54,8 +54,23 @@ function handleScan() {
         return
       }
       wifiHistoryStore.add(info, 'scanned')
-      uni.navigateTo({
-        url: `/pages/scanResult/scanResult?ssid=${encodeURIComponent(info.ssid)}&password=${encodeURIComponent(info.password)}&encryption=${encodeURIComponent(info.encryption)}`,
+      uni.showLoading({ title: '正在连接 WiFi...', mask: true })
+      attemptConnectWifi({
+        ssid: info.ssid,
+        password: info.password,
+        onSuccess: () => {
+          uni.hideLoading()
+          uni.navigateTo({
+            url: `/pages/scanResult/scanResult?${toScanResultQuery(info, true)}`,
+          })
+        },
+        onFail: () => {
+          uni.hideLoading()
+          uni.navigateTo({
+            url: `/pages/scanResult/scanResult?${toScanResultQuery(info, false)}`,
+          })
+        },
+        onComplete: () => uni.hideLoading(),
       })
     },
     fail(err) {
@@ -89,9 +104,9 @@ function goHistory() {
 
 <template>
   <view class="home-page px-48rpx pb-80rpx">
-    <view class="h-360rpx flex flex-col items-center justify-center text-white">
-      <view class="mb-32rpx center">
-        <wd-icon name="link" size="112rpx" color="#fff" />
+    <view class="h-360rpx center flex-col text-white">
+      <view class="center">
+        <wd-icon name="wifi" size="136rpx" color="#fff" />
       </view>
       <view class="text-56rpx font-700 tracking-2rpx">
         WiFi小助手
@@ -127,9 +142,8 @@ function goHistory() {
 
     <wd-cell
       v-if="historyCount > 0"
-      center
       title="历史记录"
-      is-link
+      is-link center
       :title-width="100"
       custom-class="mt-80rpx rounded-24rpx overflow-hidden shadow-sm"
       @click="goHistory"

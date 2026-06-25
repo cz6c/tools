@@ -23,7 +23,10 @@ export function canvasToTempFile(canvasId: string, size = 240): Promise<string> 
       destWidth: size * 2,
       destHeight: size * 2,
       success: res => resolve(res.tempFilePath),
-      fail: reject,
+      fail: (err) => {
+        uni.showToast({ title: '生成图片失败，请重试', icon: 'none' })
+        reject(err)
+      },
     })
   })
 }

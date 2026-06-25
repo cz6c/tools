@@ -56,7 +56,7 @@ import type { FormSchema } from '@wot-ui/ui'
 import type { FormExpose } from '@wot-ui/ui/components/wd-form/types'
 
 const formRef = ref<FormExpose>()
-const formModel = reactive({ ssid: '', encryption: 'WPA2' })
+const formModel = reactive({ ssid: '', password: '', hidden: false })
 
 const formSchema: FormSchema = {
   validate(model) {
@@ -91,22 +91,13 @@ async function submit() {
     <wd-form-item title="WiFi 名称" prop="ssid">
       <wd-input v-model="formModel.ssid" align-right placeholder="请输入 WiFi 名称" />
     </wd-form-item>
-    <wd-form-item
-      title="加密类型"
-      prop="encryption"
-      is-link
-      :value="encryptionLabel"
-      placeholder="请选择加密类型"
-      @click="showEncryptionPicker = true"
-    />
+    <wd-form-item title="密码" prop="password">
+      <wd-input v-model="formModel.password" align-right show-password placeholder="无密码可留空" />
+    </wd-form-item>
+    <wd-form-item title="是否为隐藏WiFi" prop="hidden">
+      <wd-switch v-model="formModel.hidden" size="20" />
+    </wd-form-item>
   </wd-form>
-  <wd-picker
-    v-model="encryptionPickerValue"
-    v-model:visible="showEncryptionPicker"
-    :columns="ENCRYPTION_OPTIONS"
-    title="加密类型"
-    root-portal
-  />
 </template>
 ```
 

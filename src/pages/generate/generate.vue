@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import type { FormSchema } from '@wot-ui/ui'
 import type { FormExpose } from '@wot-ui/ui/components/wd-form/types'
-import type { WifiEncryption } from '@/utils/wifi'
 import { useWifiHistoryStore } from '@/store/wifiHistory'
+import { saveImageToAlbum } from '@/utils/album'
 import { canvasToTempFile, drawQrCode } from '@/utils/drawQrCode'
-import { buildWifiQr, ENCRYPTION_OPTIONS } from '@/utils/wifi'
+import { buildWifiQr } from '@/utils/wifi'
 
 defineOptions({ name: 'Generate' })
 
@@ -24,7 +24,7 @@ const formRef = ref<FormExpose>()
 const formModel = reactive({
   ssid: '',
   password: '',
-  encryption: 'WPA2' as WifiEncryption,
+  hidden: false,
 })
 
 const formSchema: FormSchema = {
@@ -41,14 +41,6 @@ const formSchema: FormSchema = {
 const qrGenerated = ref(false)
 const qrText = ref('')
 const saving = ref(false)
-const showEncryptionPicker = ref(false)
-
-const encryptionPickerValue = computed({
-  get: () => [formModel.encryption],
-  set: (value) => {
-    formModel.encryption = value[0] as WifiEncryption
-  },
-})
 
 const qrCanvasStyle = computed(() => ({
   width: `${qrSizeRpx}rpx`,
@@ -59,9 +51,24 @@ function getQrSizePx() {
   return uni.upx2px(qrSizeRpx)
 }
 
-const encryptionLabel = computed(
-  () => ENCRYPTION_OPTIONS.find(o => o.value === formModel.encryption)?.label ?? 'WPA2',
-)
+async function renderQr(addToHistory: boolean) {
+  const info = {
+    ssid: formModel.ssid.trim(),
+    password: formModel.password,
+    hidden: formModel.hidden,
+  }
+  qrText.value = buildWifiQr(info)
+  qrGenerated.value = true
+
+  await nextTick()
+  const sizePx = getQrSizePx()
+  await drawQrCode(canvasId, qrText.value, sizePx)
+  if (addToHistory)
+    wifiHistoryStore.add(info, 'generated')
+}
+
+/** 从历史记录进入时，onReady 后自动出码 */
+const pendingHistoryGenerate = ref(false)
 
 onLoad((query) => {
   const id = query?.id as string | undefined
@@ -70,7 +77,9 @@ onLoad((query) => {
     if (item) {
       formModel.ssid = item.ssid
       formModel.password = item.password
-      formModel.encryption = item.encryption
+      formModel.hidden = item.hidden ?? false
+      if (item.type === 'generated')
+        pendingHistoryGenerate.value = true
       return
     }
   }
@@ -78,8 +87,13 @@ onLoad((query) => {
     formModel.ssid = decodeURIComponent(String(query.ssid))
   if (query?.password)
     formModel.password = decodeURIComponent(String(query.password))
-  if (query?.encryption)
-    formModel.encryption = decodeURIComponent(String(query.encryption)) as WifiEncryption
+})
+
+onReady(async () => {
+  if (!pendingHistoryGenerate.value)
+    return
+  pendingHistoryGenerate.value = false
+  await renderQr(false)
 })
 
 async function handleGenerate() {
@@ -87,18 +101,7 @@ async function handleGenerate() {
   if (!valid)
     return
 
-  const info = {
-    ssid: formModel.ssid.trim(),
-    password: formModel.password,
-    encryption: formModel.encryption,
-  }
-  qrText.value = buildWifiQr(info)
-  qrGenerated.value = true
-
-  await nextTick()
-  const sizePx = getQrSizePx()
-  await drawQrCode(canvasId, qrText.value, sizePx)
-  wifiHistoryStore.add(info, 'generated')
+  await renderQr(true)
   uni.showToast({ title: '二维码已生成', icon: 'success' })
 }
 
@@ -109,31 +112,11 @@ async function saveToAlbum() {
   try {
     const sizePx = getQrSizePx()
     const tempPath = await canvasToTempFile(canvasId, sizePx)
-    await new Promise<void>((resolve, reject) => {
-      uni.saveImageToPhotosAlbum({
-        filePath: tempPath,
-        success: () => resolve(),
-        fail: (err) => {
-          const msg = String(err?.errMsg ?? '')
-          if (msg.includes('auth deny') || msg.includes('authorize')) {
-            uni.showModal({
-              title: '需要相册权限',
-              content: '需要相册权限才能保存图片，请在设置中开启',
-              confirmText: '去设置',
-              success(res) {
-                if (res.confirm)
-                  uni.openSetting({})
-              },
-            })
-          }
-          reject(err)
-        },
-      })
-    })
+    await saveImageToAlbum(tempPath)
     uni.showToast({ title: '已保存到相册', icon: 'success' })
   }
   catch {
-    // 权限弹窗已处理
+    // 具体错误已在 saveImageToAlbum / canvasToTempFile 中提示
   }
   finally {
     saving.value = false
@@ -179,23 +162,10 @@ function handleShare() {
           custom-class="flex-1"
         />
       </wd-form-item>
-      <wd-form-item
-        title="加密类型"
-        prop="encryption"
-        is-link
-        :value="encryptionLabel"
-        placeholder="请选择加密类型"
-        @click="showEncryptionPicker = true"
-      />
+      <wd-form-item title="是否为隐藏WiFi" :title-width="200" prop="hidden">
+        <wd-switch v-model="formModel.hidden" size="20" />
+      </wd-form-item>
     </wd-form>
-
-    <wd-picker
-      v-model="encryptionPickerValue"
-      v-model:visible="showEncryptionPicker"
-      :columns="ENCRYPTION_OPTIONS"
-      title="加密类型"
-      root-portal
-    />
 
     <wd-button
       round block

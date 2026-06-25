@@ -1,4 +1,4 @@
-import type { WifiEncryption, WifiInfo } from '@/utils/wifi'
+import type { WifiInfo } from '@/utils/wifi'
 import { defineStore } from 'pinia'
 
 export type WifiHistoryType = 'scanned' | 'generated'
@@ -35,7 +35,7 @@ export const useWifiHistoryStore = defineStore('wifiHistory', {
         const existing = this.items[idx]
         const updated: WifiHistoryItem = {
           ...existing,
-          encryption: info.encryption,
+          hidden: info.hidden,
           type,
           createdAt: Date.now(),
         }
@@ -47,7 +47,7 @@ export const useWifiHistoryStore = defineStore('wifiHistory', {
         id: createId(),
         ssid: info.ssid,
         password: info.password,
-        encryption: info.encryption,
+        hidden: info.hidden,
         type,
         createdAt: Date.now(),
       }

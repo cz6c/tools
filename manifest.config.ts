@@ -141,6 +141,9 @@ export default defineManifestConfig({
       'scope.writePhotosAlbum': {
         desc: '用于保存 WiFi 二维码到相册',
       },
+      'scope.userLocation': {
+        desc: 'Android 连接 WiFi 需要位置权限',
+      },
     },
     requiredPrivateInfos: [],
   },

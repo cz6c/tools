@@ -3,7 +3,7 @@ import type { WifiHistoryItem } from '@/store/wifiHistory'
 import { storeToRefs } from 'pinia'
 import { useWifiHistoryStore } from '@/store/wifiHistory'
 import { formatHistoryTime } from '@/utils/formatTime'
-import { encryptionLabel } from '@/utils/wifi'
+import { toScanResultQuery } from '@/utils/wifi'
 
 defineOptions({ name: 'WifiHistory' })
 
@@ -43,7 +43,7 @@ function typeLabel(type: WifiHistoryItem['type']) {
 function openItem(item: WifiHistoryItem) {
   if (item.type === 'scanned') {
     uni.navigateTo({
-      url: `/pages/scanResult/scanResult?ssid=${encodeURIComponent(item.ssid)}&password=${encodeURIComponent(item.password)}&encryption=${encodeURIComponent(item.encryption)}`,
+      url: `/pages/scanResult/scanResult?${toScanResultQuery(item)}`,
     })
   }
   else {
@@ -76,14 +76,15 @@ function confirmClear() {
       v-model="keyword"
       placeholder="搜索 WiFi 名称"
       hide-cancel
-      custom-class="mb-16rpx"
+      variant="light"
+      custom-class="search mb-16rpx"
     />
 
-    <view v-if="list.length > 0" class="flex items-center justify-between px-8rpx py-16rpx pb-24rpx">
+    <view v-if="list.length > 0" class="flex items-center justify-between px-8rpx pb-16rpx">
       <text class="text-26rpx text-#999">
         {{ keywordTrimmed ? `找到 ${filteredList.length} 条` : `共 ${list.length} 条` }}
       </text>
-      <wd-button variant="plain" size="small" custom-class="clear-btn" @click="confirmClear">
+      <wd-button variant="text" type="danger" size="small" @click="confirmClear">
         清空
       </wd-button>
     </view>
@@ -98,7 +99,7 @@ function confirmClear() {
       tip="未找到匹配的 WiFi 记录"
     />
 
-    <wd-cell-group center v-else border custom-class="card-rounded" :title-width="100">
+    <wd-cell-group v-else center border custom-class="card-rounded" :title-width="100">
       <wd-cell
         v-for="item in filteredList"
         :key="item.id"
@@ -109,12 +110,11 @@ function confirmClear() {
       >
         <template #label>
           <view class="mt-8rpx flex gap-12rpx">
-            <wd-tag type="default" mark>
-              {{ encryptionLabel(item.encryption) }}
-            </wd-tag>
             <wd-tag
               :type="item.type === 'scanned' ? 'primary' : 'success'"
               mark
+              variant="light"
+              size="medium"
             >
               {{ typeLabel(item.type) }}
             </wd-tag>
@@ -126,8 +126,8 @@ function confirmClear() {
 </template>
 
 <style scoped lang="scss">
-:deep(.clear-btn) {
-  color: #ff4d4f !important;
-  border-color: #ff4d4f !important;
+:deep(.search) {
+  padding: 0 !important;
+  background: none !important;
 }
 </style>
