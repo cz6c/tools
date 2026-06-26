@@ -117,7 +117,7 @@ function retryConnect() {
 
 function goHome() {
   uni.navigateBack({
-    fail: () => uni.reLaunch({ url: '/pages/index/index' }),
+    fail: () => uni.reLaunch({ url: '/pages-sub/wifi/index' }),
   })
 }
 </script>

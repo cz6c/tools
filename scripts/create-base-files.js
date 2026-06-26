@@ -14,11 +14,10 @@ const manifest = { }
 const pages = {
   pages: [
     {
-      path: 'pages/index/index',
+      path: 'pages/salary/calc',
       type: 'home',
       style: {
-        navigationStyle: 'custom',
-        navigationBarTitleText: '首页',
+        navigationBarTitleText: '税后工资计算',
       },
     },
     {

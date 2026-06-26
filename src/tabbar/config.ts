@@ -27,7 +27,7 @@ export const nativeTabbarList: NativeTabBarItem[] = [
   {
     iconPath: 'static/tabbar/home.png',
     selectedIconPath: 'static/tabbar/homeHL.png',
-    pagePath: 'pages/index/index',
+    pagePath: 'pages/salary/calc',
     text: '首页',
   },
 ]

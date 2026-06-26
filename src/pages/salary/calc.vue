@@ -16,6 +16,7 @@ import { getCityProfile } from '@/utils/salaryCalculator'
 defineOptions({ name: 'SalaryCalc' })
 
 definePage({
+  type: 'home',
   style: {
     navigationBarTitleText: '税后工资计算',
   },
@@ -129,7 +130,7 @@ const hfRatePercentStr = computed(() => {
 })
 
 function openSelectCity() {
-  uni.navigateTo({ url: '/pages-sub/salary/select-city' })
+  uni.navigateTo({ url: '/pages/salary/select-city' })
 }
 
 function onYearEndModeConfirm({ value }: { value: (string | number)[] }) {
@@ -167,11 +168,11 @@ function goDetail() {
       result: cloneSalaryCalcResult(result.value),
     },
   })
-  uni.navigateTo({ url: '/pages-sub/salary/detail' })
+  uni.navigateTo({ url: '/pages/salary/detail' })
 }
 
 function goHistory() {
-  uni.navigateTo({ url: '/pages-sub/salary/history' })
+  uni.navigateTo({ url: '/pages/salary/history' })
 }
 </script>
 

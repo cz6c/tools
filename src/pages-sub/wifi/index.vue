@@ -7,7 +7,6 @@ import { attemptConnectWifi, parseWifiQr, toScanResultQuery } from '@/utils/wifi
 defineOptions({ name: 'Home' })
 
 definePage({
-  type: 'home',
   style: {
     navigationBarTitleText: 'WiFi小助手',
   },
@@ -49,7 +48,7 @@ function handleScan() {
       const info = parseWifiQr(raw)
       if (!info) {
         uni.navigateTo({
-          url: `/pages/scanResult/scanResult?invalid=1&raw=${encodeURIComponent(raw)}`,
+          url: `/pages-sub/wifi/scanResult?invalid=1&raw=${encodeURIComponent(raw)}`,
         })
         return
       }
@@ -61,13 +60,13 @@ function handleScan() {
         onSuccess: () => {
           uni.hideLoading()
           uni.navigateTo({
-            url: `/pages/scanResult/scanResult?${toScanResultQuery(info, true)}`,
+            url: `/pages-sub/wifi/scanResult?${toScanResultQuery(info, true)}`,
           })
         },
         onFail: () => {
           uni.hideLoading()
           uni.navigateTo({
-            url: `/pages/scanResult/scanResult?${toScanResultQuery(info, false)}`,
+            url: `/pages-sub/wifi/scanResult?${toScanResultQuery(info, false)}`,
           })
         },
         onComplete: () => uni.hideLoading(),
@@ -94,11 +93,11 @@ function handleScan() {
 }
 
 function goGenerate() {
-  uni.navigateTo({ url: '/pages/generate/generate' })
+  uni.navigateTo({ url: '/pages-sub/wifi/generate' })
 }
 
 function goHistory() {
-  uni.navigateTo({ url: '/pages/history/history' })
+  uni.navigateTo({ url: '/pages-sub/wifi/history' })
 }
 </script>
 
@@ -125,7 +124,7 @@ function goHistory() {
       >
         <view class="center gap-20rpx">
           <wd-icon name="camera" size="40rpx" />
-          <text>扫一扫</text>
+          <text>扫码直连</text>
         </view>
       </wd-button>
       <wd-button
@@ -135,7 +134,7 @@ function goHistory() {
       >
         <view class="center gap-20rpx">
           <wd-icon name="picture" size="40rpx" />
-          <text>生成我的WiFi码</text>
+          <text>生成WiFi码</text>
         </view>
       </wd-button>
     </view>

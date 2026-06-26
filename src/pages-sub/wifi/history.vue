@@ -43,12 +43,12 @@ function typeLabel(type: WifiHistoryItem['type']) {
 function openItem(item: WifiHistoryItem) {
   if (item.type === 'scanned') {
     uni.navigateTo({
-      url: `/pages/scanResult/scanResult?${toScanResultQuery(item)}`,
+      url: `/pages-sub/wifi/scanResult?${toScanResultQuery(item)}`,
     })
   }
   else {
     uni.navigateTo({
-      url: `/pages/generate/generate?id=${encodeURIComponent(item.id)}`,
+      url: `/pages-sub/wifi/generate?id=${encodeURIComponent(item.id)}`,
     })
   }
 }
