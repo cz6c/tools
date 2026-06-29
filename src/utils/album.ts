@@ -9,7 +9,7 @@ export function saveImageToAlbum(filePath: string): Promise<void> {
         if (msg.includes('auth deny') || msg.includes('authorize')) {
           uni.showModal({
             title: '需要相册权限',
-            content: '需要相册权限才能保存图片，请在设置中开启',
+            content: '请在设置中允许保存到相册后重试',
             confirmText: '去设置',
             success: (res) => {
               if (res.confirm)

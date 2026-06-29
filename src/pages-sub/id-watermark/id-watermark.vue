@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { ComponentPublicInstance } from 'vue'
 import { getCurrentInstance, nextTick, reactive, ref, watch } from 'vue'
+import { saveCanvasToAlbum } from '@/utils/canvasExport'
 
 defineOptions({ name: 'IdWatermark' })
 
@@ -185,52 +186,22 @@ function saveWatermarked() {
 
   saving.value = true
 
-  nextTick(() => {
-    uni.canvasToTempFilePath(
-      {
+  nextTick(async () => {
+    try {
+      await saveCanvasToAlbum({
         canvasId,
         width: canvasW.value,
         height: canvasH.value,
-        destWidth: canvasW.value,
-        destHeight: canvasH.value,
-        fileType: 'png',
-        quality: 1,
-        success: (res) => {
-          const tempPath = res.tempFilePath
-          uni.saveImageToPhotosAlbum({
-            filePath: tempPath,
-            success: () => {
-              uni.showToast({ title: '已保存到相册' })
-            },
-            fail: (err) => {
-              const msg = String(err.errMsg ?? '')
-              if (msg.includes('auth deny') || msg.includes('authorize')) {
-                uni.showModal({
-                  title: '需要相册权限',
-                  content: '请在设置中允许保存到相册后重试',
-                  confirmText: '去设置',
-                  success: (m) => {
-                    if (m.confirm)
-                      uni.openSetting()
-                  },
-                })
-              }
-              else {
-                uni.showToast({ title: '保存失败', icon: 'none' })
-              }
-            },
-            complete: () => {
-              saving.value = false
-            },
-          })
-        },
-        fail: () => {
-          uni.showToast({ title: '导出失败', icon: 'none' })
-          saving.value = false
-        },
-      },
-      canvasHost,
-    )
+        canvasHost,
+      })
+      uni.showToast({ title: '已保存到相册', icon: 'success' })
+    }
+    catch {
+      // 具体错误已在 saveCanvasToAlbum 中提示
+    }
+    finally {
+      saving.value = false
+    }
   })
 }
 </script>
@@ -238,20 +209,20 @@ function saveWatermarked() {
 <template>
   <view class="page-shell pb-safe">
     <wd-notice-bar
-      text="小程序不会存储您的原始照片及加了水印后的照片，请放心使用！"
+      text="小程序不会存储您的原始照片及水印照片，请放心使用！"
       prefix="notification"
       type="warning"
     />
 
     <view class="px-32rpx pt-24rpx">
-      <view class="preview-canvas-wrap checkerboard relative w-full min-h-360rpx flex center overflow-hidden rounded-16rpx">
+      <view class="preview-canvas-wrap checkerboard relative min-h-360rpx w-full center flex overflow-hidden rounded-16rpx" @click="choosePhoto">
         <canvas
           :id="canvasId"
           :canvas-id="canvasId"
           class="block max-w-full"
           :style="canvasStyle"
         />
-        <view v-if="!imagePath" class="absolute inset-0 center pointer-events-none">
+        <view v-if="!imagePath" class="pointer-events-none absolute inset-0 center">
           <wd-empty tip="请先选择证件照片" />
         </view>
       </view>
@@ -275,7 +246,7 @@ function saveWatermarked() {
       </wd-form-item>
 
       <wd-form-item title="颜色" prop="color">
-        <view class="inline-flex w-full flex-nowrap items-center justify-end gap-16rpx">
+        <view class="w-full inline-flex flex-nowrap items-center justify-end gap-16rpx">
           <wd-tag
             v-for="c in colors"
             :key="c.value"
@@ -300,7 +271,7 @@ function saveWatermarked() {
       </wd-form-item>
 
       <wd-form-item title="角度" prop="angleDeg">
-        <view class="inline-flex w-full flex-nowrap items-center justify-end gap-16rpx">
+        <view class="w-full inline-flex flex-nowrap items-center justify-end gap-16rpx">
           <wd-tag
             v-for="a in anglePresets"
             :key="a.deg"

@@ -1,12 +1,17 @@
 <script lang="ts" setup>
 import type { FormSchema } from '@wot-ui/ui'
 import type { FormExpose } from '@wot-ui/ui/components/wd-form/types'
+import type { ComponentPublicInstance } from 'vue'
+import { getCurrentInstance } from 'vue'
 import { useWifiHistoryStore } from '@/store/wifiHistory'
-import { saveImageToAlbum } from '@/utils/album'
-import { canvasToTempFile, drawQrCode } from '@/utils/drawQrCode'
+import { saveCanvasToAlbum } from '@/utils/canvasExport'
+import { drawQrCode } from '@/utils/drawQrCode'
 import { buildWifiQr } from '@/utils/wifi'
 
 defineOptions({ name: 'Generate' })
+
+/** 小程序端 canvas API 需传入页面/组件实例 */
+const canvasHost = getCurrentInstance()?.proxy as ComponentPublicInstance | undefined
 
 definePage({
   style: {
@@ -62,7 +67,7 @@ async function renderQr(addToHistory: boolean) {
 
   await nextTick()
   const sizePx = getQrSizePx()
-  await drawQrCode(canvasId, qrText.value, sizePx)
+  await drawQrCode(canvasId, qrText.value, sizePx, canvasHost)
   if (addToHistory)
     wifiHistoryStore.add(info, 'generated')
 }
@@ -111,12 +116,16 @@ async function saveToAlbum() {
   saving.value = true
   try {
     const sizePx = getQrSizePx()
-    const tempPath = await canvasToTempFile(canvasId, sizePx)
-    await saveImageToAlbum(tempPath)
+    await saveCanvasToAlbum({
+      canvasId,
+      width: sizePx,
+      height: sizePx,
+      canvasHost,
+    })
     uni.showToast({ title: '已保存到相册', icon: 'success' })
   }
   catch {
-    // 具体错误已在 saveImageToAlbum / canvasToTempFile 中提示
+    // 具体错误已在 saveCanvasToAlbum 中提示
   }
   finally {
     saving.value = false
@@ -186,7 +195,7 @@ function handleShare() {
           :style="qrCanvasStyle"
         />
       </view>
-      <view class="flex-actions mt-40rpx">
+      <view class="mt-40rpx flex-actions">
         <wd-button
           variant="plain" round block
           :loading="saving"
